@@ -83,7 +83,7 @@ const handleSearch = () => {
   };
 
   const handleCitySearch = async () => {
-    if (!inputCity.trim()) return; // Jeśli pole jest puste, nic nie rób
+    if (!inputCity.trim()) return;
 
     try {
       const response = await fetch(
@@ -97,10 +97,9 @@ const handleSearch = () => {
       const data = await response.json();
 
       if (data && data.length > 0) {
-        // API zwróciło wyniki, pobieramy lat i lon z pierwszego dopasowania
         setLocation({ lat: data[0].lat, lon: data[0].lon });
-        Keyboard.dismiss(); // Chowa klawiaturę
-        setInputCity(''); // Czyści pole wyszukiwania po sukcesie
+        Keyboard.dismiss();
+        setInputCity('');
       } else {
         Alert.alert("Błąd", "Nie znaleziono miejscowości o podanej nazwie.");
       }
@@ -288,9 +287,8 @@ return (
                 const day = date.getDate().toString().padStart(2, '0');
                 const month = (date.getMonth() + 1).toString().padStart(2, '0');
                 
-                // Tablica z dniami tygodnia w języku polskim
                 const daysPL = ['niedz.', 'pon.', 'wt.', 'śr.', 'czw.', 'pt.', 'sob.'];
-                const dayOfWeek = daysPL[date.getDay()]; // getDay() zwraca numer od 0 (niedziela) do 6 (sobota)
+                const dayOfWeek = daysPL[date.getDay()];
 
                 return (
                   <View style={styles.forecastItem}>
