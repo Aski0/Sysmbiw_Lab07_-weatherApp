@@ -160,18 +160,33 @@ useEffect(() => {
   if (!weather) { return <ActivityIndicator />; }
   
 
-  return (
+return (
     <ImageBackground source={require('../assets/background.jpg')} style={styles.container}>
       <View style={[StyleSheet.absoluteFill, styles.imgBackground]} />
 
       <View style={[styles.weatherParams, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
         <Text style={styles.location}>{weather.name}</Text>
+        
+        {/* Nowe: Opis zjawiska atmosferycznego */}
+        <Text style={styles.description}>
+          {weather.weather[0].description}
+        </Text>
+
         <LottieView
           source={weather.weather[0].main === 'Rain' ? LOTTIE_RAIN : LOTTIE_SUNNY}
           style={styles.lottiePicture}
           loop
           autoPlay
         />
+
+        {/* Nowe: Blok z parametrami z weather.main */}
+        <View style={styles.detailsContainer}>
+          <Text style={styles.tempText}>{Math.round(weather.main.temp)}°C</Text>
+          <Text style={styles.detailsText}>Odczuwalna: {Math.round(weather.main.feels_like)}°C</Text>
+          <Text style={styles.detailsText}>Ciśnienie: {weather.main.pressure} hPa</Text>
+          <Text style={styles.detailsText}>Wilgotność: {weather.main.humidity}%</Text>
+        </View>
+
       </View>
 
       <StatusBar style="light" />
@@ -214,6 +229,31 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: 'lightgray',
     textAlign: 'center',
+  },
+  description: {
+    fontSize: 22,
+    color: 'white',
+    marginTop: 5,
+    textTransform: 'capitalize', // sprawi, że opis np. "clear sky" zmieni się na "Clear sky" lub "Clear Sky"
+  },
+  detailsContainer: {
+    marginTop: 20,
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.4)', // Półprzezroczyste tło dla lepszej czytelności
+    padding: 20,
+    borderRadius: 15,
+    width: '80%',
+  },
+  tempText: {
+    fontSize: 64,
+    fontWeight: 'bold',
+    color: 'white',
+    marginBottom: 10,
+  },
+  detailsText: {
+    fontSize: 18,
+    color: 'lightgray',
+    marginVertical: 4,
   },
 });
 
