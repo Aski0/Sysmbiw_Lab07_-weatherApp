@@ -135,7 +135,6 @@ useEffect(() => {
         const loc = await Location.getCurrentPositionAsync(
           { accuracy: Location.Accuracy.Balanced });
         const coords: TGeoCoords = { lat: loc.coords.latitude, lon: loc.coords.longitude };
-        // const coords: TGeoCoords = { lat: 50.07559, lon: 19.99528 };
         if (isMounted) setLocation(coords);
         if (__DEV__) console.log('Location coords: ', coords);
       } catch (error) {
@@ -184,7 +183,6 @@ return (
           <Text style={styles.detailsText}>Wilgotność: {weather.main.humidity}%</Text>
         </View>
 
-        {/* NOWA SEKCJA: Prognoza pogody */}
         {forecast && (
           <View style={styles.forecastContainer}>
             <Text style={styles.forecastTitle}>Prognoza na kolejne godziny</Text>
@@ -194,7 +192,6 @@ return (
               keyExtractor={(item) => item.dt.toString()}
               showsHorizontalScrollIndicator={false}
               renderItem={({ item }) => {
-                // Konwersja znacznika czasu Unix (w sekundach) na obiekt daty
                 const date = new Date(item.dt * 1000);
                 const hours = date.getHours().toString().padStart(2, '0');
                 const minutes = date.getMinutes().toString().padStart(2, '0');
@@ -260,12 +257,12 @@ const styles = StyleSheet.create({
     fontSize: 22,
     color: 'white',
     marginTop: 5,
-    textTransform: 'capitalize', // sprawi, że opis np. "clear sky" zmieni się na "Clear sky" lub "Clear Sky"
+    textTransform: 'capitalize',
   },
   detailsContainer: {
     marginTop: 20,
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.4)', // Półprzezroczyste tło dla lepszej czytelności
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
     padding: 20,
     borderRadius: 15,
     width: '80%',
@@ -283,8 +280,8 @@ const styles = StyleSheet.create({
   },
   forecastContainer: {
     width: '100%',
-    marginTop: 30, // Odstęp od aktualnych szczegółów pogody
-    height: 150, // Zarezerwowane miejsce na listę
+    marginTop: 30,
+    height: 150,
   },
   forecastTitle: {
     fontSize: 18,
@@ -313,7 +310,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   forecastTemp: {
-    color: '#ffff00', // Żółtawy kolor, nawiązanie do tekstu z App.tsx
+    color: '#ffff00',
     fontSize: 22,
     fontWeight: 'bold',
     marginTop: 8,
