@@ -48,7 +48,13 @@ type TGeoCoords = {
 export type TWeatherForecast = {
   main: TMainWeather;
   dt: number;
-  dt_text?: string;
+  dt_txt?: string;
+  weather: Array<{
+    id: number;
+    main: string;
+    description: string;
+    icon: string;
+  }>;
 };
 
 const WeatherScreen = () => {
@@ -216,6 +222,20 @@ return (
       <View style={styles.searchContainer}>
           <TextInput
             style={styles.input}
+            placeholder="Wpisz nazwę miasta..."
+            placeholderTextColor="#aaa"
+            value={inputCity}
+            onChangeText={setInputCity}
+            onSubmitEditing={handleCitySearch}
+          />
+          <TouchableOpacity style={styles.searchButton} onPress={handleCitySearch}>
+            <Text style={styles.searchButtonText}>Szukaj</Text>
+          </TouchableOpacity>
+        </View>
+
+      <View style={styles.searchContainer}>
+          <TextInput
+            style={styles.input}
             placeholder="Szerokość (Lat)"
             placeholderTextColor="#aaa"
             keyboardType="numeric"
@@ -237,7 +257,6 @@ return (
 
 
         <Text style={styles.location}>{weather.name}</Text>
-        <Text style={styles.description}>{weather.weather[0].description}</Text>
 
         <LottieView
           source={weather.weather[0].main === 'Rain' ? LOTTIE_RAIN : LOTTIE_SUNNY}
@@ -245,6 +264,7 @@ return (
           loop
           autoPlay
         />
+        <Text style={styles.description}>{weather.weather[0].description}</Text>
 
         <View style={styles.detailsContainer}>
           <Text style={styles.tempText}>{Math.round(weather.main.temp)}°C</Text>
@@ -255,7 +275,7 @@ return (
 
         {forecast && (
           <View style={styles.forecastContainer}>
-            <Text style={styles.forecastTitle}>Prognoza na kolejne godziny</Text>
+            <Text style={styles.forecastTitle}>PROGNOZA (5 dni)</Text>
             <FlatList
               horizontal
               data={forecast}
@@ -267,12 +287,18 @@ return (
                 const minutes = date.getMinutes().toString().padStart(2, '0');
                 const day = date.getDate().toString().padStart(2, '0');
                 const month = (date.getMonth() + 1).toString().padStart(2, '0');
+                
+                // Tablica z dniami tygodnia w języku polskim
+                const daysPL = ['niedz.', 'pon.', 'wt.', 'śr.', 'czw.', 'pt.', 'sob.'];
+                const dayOfWeek = daysPL[date.getDay()]; // getDay() zwraca numer od 0 (niedziela) do 6 (sobota)
 
                 return (
                   <View style={styles.forecastItem}>
-                    <Text style={styles.forecastDate}>{day}.{month}</Text>
+                    <Text style={styles.forecastDate}>{dayOfWeek} {day}.{month}</Text>
                     <Text style={styles.forecastTime}>{hours}:{minutes}</Text>
                     <Text style={styles.forecastTemp}>{Math.round(item.main.temp)}°C</Text>
+                    <Text style={styles.forecastDesc}>{item.weather[0].description}</Text>
+                    <Text style={styles.forecastHumidity}>💧 {item.main.humidity}%</Text>
                   </View>
                 );
               }}
@@ -330,12 +356,11 @@ const styles = StyleSheet.create({
     textTransform: 'capitalize',
   },
   detailsContainer: {
-    marginTop: 20,
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
     padding: 20,
     borderRadius: 15,
     width: '80%',
+    marginBottom: 20,
   },
   tempText: {
     fontSize: 64,
@@ -350,14 +375,15 @@ const styles = StyleSheet.create({
   },
   forecastContainer: {
     width: '100%',
-    marginTop: 30,
-    height: 150,
+    marginTop: 10,
+    height: 190,
   },
   forecastTitle: {
-    fontSize: 18,
+    textAlign: 'center',
+    fontSize: 16,
+    opacity: 0.8,
     color: 'white',
-    fontWeight: 'bold',
-    marginLeft: 20,
+    fontWeight: 'ultralight',
     marginBottom: 10,
   },
   forecastItem: {
@@ -380,7 +406,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   forecastTemp: {
-    color: '#ffff00',
+    color: '#f0ae35f1',
     fontSize: 22,
     fontWeight: 'bold',
     marginTop: 8,
@@ -389,7 +415,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     width: '90%',
     justifyContent: 'space-between',
-    marginBottom: 20,
+    marginBottom: 10,
     marginTop: 10,
   },
   input: {
@@ -402,7 +428,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 5,
   },
   searchButton: {
-    backgroundColor: '#ffff00', // żółty kolor nawiązujący do motywu
+    backgroundColor: '#f0ae35f1',
     paddingHorizontal: 20,
     paddingVertical: 10,
     borderRadius: 10,
@@ -418,6 +444,19 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: 'bold',
     marginBottom: 5,
+  },
+  forecastDesc: {
+    color: 'lightgray',
+    fontSize: 14,
+    textTransform: 'capitalize',
+    marginTop: 5,
+    textAlign: 'center',
+  },
+  forecastHumidity: {
+    color: '#87CEFA',
+    fontSize: 14,
+    marginTop: 5,
+    fontWeight: 'bold',
   },
 });
 
