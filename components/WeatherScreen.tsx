@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { View, Text, ActivityIndicator, StyleSheet, FlatList } from 'react-native';
+import { View, Text, ActivityIndicator, StyleSheet, FlatList, TextInput, TouchableOpacity, Keyboard, Alert } from 'react-native';
 import { ImageBackground } from 'expo-image';
 import * as Location from 'expo-location';
 import LottieView from 'lottie-react-native';
@@ -10,6 +10,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const LOTTIE_RAIN = require('../assets/lottie/rain.json');
 const LOTTIE_SUNNY = require('../assets/lottie/sunny.json');
+
 
 const BASE_URL = `https://api.openweathermap.org/data/2.5/`;
 const O_W_KEY = '552486e9827174555562b5ea2504d016';
@@ -57,6 +58,51 @@ const WeatherScreen = () => {
   const [errorMsg, setErrorMsg] = useState('');
   const [weather, setWeather] = useState<TWeather>();
   const [forecast, setForecast] = useState<TWeatherForecast[]>();
+  const [inputLat, setInputLat] = useState('');
+  const [inputLon, setInputLon] = useState('');
+  const [inputCity, setInputCity] = useState('');
+
+const handleSearch = () => {
+    const lat = parseFloat(inputLat.replace(',', '.'));
+    const lon = parseFloat(inputLon.replace(',', '.'));
+
+    if (!isNaN(lat) && !isNaN(lon)) {
+      setLocation({ lat, lon });
+      Keyboard.dismiss();
+      setInputLat('');
+      setInputLon('');
+    } else {
+      Alert.alert("Błąd", "Wprowadź poprawne współrzędne liczbowe.");
+    }
+  };
+
+  const handleCitySearch = async () => {
+    if (!inputCity.trim()) return; // Jeśli pole jest puste, nic nie rób
+
+    try {
+      const response = await fetch(
+        `https://api.openweathermap.org/geo/1.0/direct?q=${inputCity}&limit=1&appid=${O_W_KEY}`
+      );
+
+      if (!response.ok) {
+        throw new Error('Geocoding request failed');
+      }
+
+      const data = await response.json();
+
+      if (data && data.length > 0) {
+        // API zwróciło wyniki, pobieramy lat i lon z pierwszego dopasowania
+        setLocation({ lat: data[0].lat, lon: data[0].lon });
+        Keyboard.dismiss(); // Chowa klawiaturę
+        setInputCity(''); // Czyści pole wyszukiwania po sukcesie
+      } else {
+        Alert.alert("Błąd", "Nie znaleziono miejscowości o podanej nazwie.");
+      }
+    } catch (error) {
+      Alert.alert("Błąd sieci", "Nie udało się pobrać danych lokalizacji.");
+      if (__DEV__) console.log('Geocoding error: ', error);
+    }
+  };
 
   const fetchWeather = async (signal?: AbortSignal) => {
   if (!location) return;
@@ -166,6 +212,30 @@ return (
       <View style={[StyleSheet.absoluteFill, styles.imgBackground]} />
 
       <View style={[styles.weatherParams, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
+
+      <View style={styles.searchContainer}>
+          <TextInput
+            style={styles.input}
+            placeholder="Szerokość (Lat)"
+            placeholderTextColor="#aaa"
+            keyboardType="numeric"
+            value={inputLat}
+            onChangeText={setInputLat}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Długość (Lon)"
+            placeholderTextColor="#aaa"
+            keyboardType="numeric"
+            value={inputLon}
+            onChangeText={setInputLon}
+          />
+          <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
+            <Text style={styles.searchButtonText}>Szukaj</Text>
+          </TouchableOpacity>
+        </View>
+
+
         <Text style={styles.location}>{weather.name}</Text>
         <Text style={styles.description}>{weather.weather[0].description}</Text>
 
@@ -314,6 +384,40 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: 'bold',
     marginTop: 8,
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    width: '90%',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+    marginTop: 10,
+  },
+  input: {
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    color: 'white',
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    borderRadius: 10,
+    flex: 1,
+    marginHorizontal: 5,
+  },
+  searchButton: {
+    backgroundColor: '#ffff00', // żółty kolor nawiązujący do motywu
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 10,
+    justifyContent: 'center',
+    marginLeft: 5,
+  },
+  searchButtonText: {
+    color: 'black',
+    fontWeight: 'bold',
+  },
+  orText: {
+    color: '#888',
+    fontSize: 12,
+    fontWeight: 'bold',
+    marginBottom: 5,
   },
 });
 
